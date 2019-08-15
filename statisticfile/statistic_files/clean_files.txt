@@ -1,0 +1,169 @@
+package com.abc1225.statisticfile;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+public class StatisticFiles {
+    public static ArrayList<String> mIncludeExt = new ArrayList<>();
+    public static void main(String[] args) throws Exception {
+        mIncludeExt.add(".java");
+        File inputFile = new File(".\\statisticfile\\src\\main");
+        File outputFile = new File(".\\statisticfile\\statistic_files\\clean_files.txt");
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outputFile));
+        StringBuffer stringBuffer = new StringBuffer();
+        System.out.println("InputDir is : "+inputFile.getAbsolutePath());
+        readDir(inputFile, stringBuffer);
+        System.out.println("Read file is over!");
+        int line = countDirLines(inputFile);
+        System.out.println("Total Line Number is : " + line);
+        write(stringBuffer.toString(), bufferedWriter);
+    }
+    private static void readDir(File dir, StringBuffer sb){
+        File[] files = dir.listFiles();
+        if (files!=null)
+            for(File file:files){
+                if(file.isDirectory()){
+                    readDir(file, sb);
+                }else {
+                    if(file.length() !=0 ){
+                        String suffix = "."+getFileSuffix(file.getName());
+                        if(file.getName().endsWith(suffix) && mIncludeExt.contains(suffix)){
+                            sb.append(readFileToString(file));
+                        }
+                    }
+                }
+            }
+    }
+    private static String readFileToString(File file){
+        BufferedReader bufferedReader = null;
+        StringBuilder builder = new StringBuilder();
+        try {
+            bufferedReader = new BufferedReader(new FileReader(file));
+            String line = null;
+            StringBuilder builder1 = new StringBuilder();
+            while((line = bufferedReader.readLine())!=null){
+                String s = line.trim();
+                if(s.length() == 0){
+                    continue;
+                }
+                builder1.append(line).append("\n");
+            }
+            String fileText = builder1.toString();
+            if(fileText.length() > 0){
+                fileText = removeComment(fileText);
+            }
+            String[] lines = fileText.split("\n");
+            for (String s:lines) {
+                String temp = s.trim();
+                if(temp.length() == 0){
+                    continue;
+                }
+                builder.append(s).append("\n");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                if(bufferedReader!=null){
+                    bufferedReader.close();
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        return builder.toString();
+    }
+    private static void write(String str, Writer writer){
+        try {
+            writer.write(str);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                if(writer!=null)
+                    writer.close();
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+    }
+    private static int countDirLines(File dir){
+        File[] files = dir.listFiles();
+        int line = 0;
+        if (files != null)
+            for(File file:files){
+                if(file.isDirectory()){
+                    line += countDirLines(file);
+                }else {
+                    if(file.length()!=0){
+                        String suffix = "."+getFileSuffix(file.getName());
+                        if(file.getName().endsWith(suffix) && mIncludeExt.contains(suffix)){
+                            line += readFileLines(file);
+                        }
+                    }
+                }
+            }
+        return line;
+    }
+    private static int readFileLines(File file){
+        BufferedReader bufferedReader = null;
+        int lineCount = 0;
+        StringBuilder builder = new StringBuilder();
+        try {
+            bufferedReader = new BufferedReader(new FileReader(file));
+            String line = null;
+            StringBuilder builder1 = new StringBuilder();
+            while((line = bufferedReader.readLine())!=null){
+                String s = line.trim();
+                if(s.length() == 0){
+                    continue;
+                }
+                builder1.append(line).append("\n");
+            }
+            String fileText = builder1.toString();
+            if(fileText.length() > 0){
+                fileText = removeComment(fileText);
+            }
+            String[] lines = fileText.split("\n");
+            for (String s:lines) {
+                String temp = s.trim();
+                if(temp.length() == 0){
+                    continue;
+                }
+                lineCount++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            try {
+                if(bufferedReader!=null){
+                    bufferedReader.close();
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        return lineCount;
+    }
+    private static String removeComment(String text){
+        return text.replaceAll("(?<!:)\\/\\/.*|\\/\\*(\\s|.)*?\\*\\/", "\n");
+    }
+    private static String getFileSuffix(String fileName){
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+}
+package com.abc1225.statisticfile;
+import java.util.ArrayList;
+public class TestComment {
+    public static ArrayList<String> mIncludeExt = new ArrayList<>();
+    private static String removeComment(String text){       
+        return text.replaceAll("(?<!:)\\/\\/.*|\\/\\*(\\s|.)*?\\*\\/", "\n");
+    }
+    private static String getFileSuffix(String fileName){    
+        return  
+ fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+}
