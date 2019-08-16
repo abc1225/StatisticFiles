@@ -48,6 +48,8 @@ public class TestComment {
 
     // 将所有注释移除掉,替换成换行符
     private static String removeComment(String text){       /*我是注释我是注释我是注释我是注释我是注释我是注释我是注释我是注释*/
+
+        String error = "this is a BUG /*";
         return text.replaceAll("(?<!:)\\/\\/.*|\\/\\*(\\s|.)*?\\*\\/", "\n");
     }
 
