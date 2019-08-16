@@ -12,11 +12,13 @@ import java.util.ArrayList;
  * 申请软著使用 统计Android代码 其它代码可以修改扩展
  * 1. 统计目录下的代码有效行数
  * 2. 删除文件中的注释和空行  可处理的注释规则 行注释和块注释  【//  \/*  *\/】
- * 3. 存在的问题： 写在一行代码中间的注释，会增加一个换行, 相信正常人应该不会这么写注释
+ * 3. 存在的问题：
+ *    A. 写在一行代码中间的注释，会增加一个换行, 可忽略，正常人不会这么写注释
  *      如:   return  \/*我是注///*//*/////释我是*\/  fileName.substring(fileName.lastIndexOf(".") + 1);
  *      处理完后变成如下:
  *              return
  *          fileName.substring(fileName.lastIndexOf(".") + 1);
+ *    B. 代码中包含"/*"的字符串会导致栈溢出， 需要手动在removeComment() 函数中将其过滤掉
  */
 public class StatisticFiles {
 
@@ -86,7 +88,7 @@ public class StatisticFiles {
             StringBuilder builder1 = new StringBuilder();
             while((line = bufferedReader.readLine())!=null){
                 String s = line.trim();
-                if(s.length() == 0){
+                if(s.length() == 0 || s.startsWith("//") || s.startsWith("Log.")){
                     continue;
                 }
                 builder1.append(line).append("\n");
@@ -171,7 +173,7 @@ public class StatisticFiles {
             StringBuilder builder1 = new StringBuilder();
             while((line = bufferedReader.readLine())!=null){
                 String s = line.trim();
-                if(s.length() == 0){
+                if(s.length() == 0 || s.startsWith("//") || s.startsWith("Log.")){
                     continue;
                 }
                 builder1.append(line).append("\n");
@@ -207,8 +209,9 @@ public class StatisticFiles {
     }
 
     // 将所有注释移除掉,替换成换行符
+    // 过滤掉 image/* Android中获取系统图片
     private static String removeComment(String text){
-        return text.replaceAll("(?<!:)\\/\\/.*|\\/\\*(\\s|.)*?\\*\\/", "\n");
+        return text.replaceAll("(?<!:)\\/\\/.*|(?<!image)\\/\\*(\\s|.)*?\\*\\/", "\n");
     }
 
     private static String getFileSuffix(String fileName){

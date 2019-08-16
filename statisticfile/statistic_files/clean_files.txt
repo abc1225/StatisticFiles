@@ -1,5 +1,221 @@
 package com.abc1225.statisticfile;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+public class main
+{
+    public static void main(String[] args)
+    {
+        String test1 = "printf(\"Hello 
+ inside 
+ string */ world\")";
+        String test2 = "
+        String test3 = "
+        String test = ReadFileToString(".\\statisticfile\\src\\main\\java\\com\\abc1225\\statisticfile\\TestComment.java");
+        System.out.println(removeCommentsWithQuoteAndDoubleEscape(test));
+    }
+    public static String removeComments(String code)
+    {
+        StringBuilder sb = new StringBuilder();
+        int cnt = 0;
+        for (int i = 0; i < code.length(); i++)
+        {
+            if(cnt == 0)
+            {
+                if(i+1 < code.length() && code.charAt(i) == '/' && code.charAt(i+1) == '*')
+                {
+                    cnt++;
+                    i++;
+                    continue;
+                }
+            }
+            else
+            {
+                if(i+1 < code.length() && code.charAt(i) == '*' && code.charAt(i+1) == '/')
+                {
+                    cnt--;
+                    i++;
+                    continue;
+                }
+                if(i+1 < code.length() && code.charAt(i) == '/' && code.charAt(i+1) == '*')
+                {
+                    cnt++;
+                    i++;
+                    continue;
+                }
+            }
+            if(cnt == 0)
+            {
+                sb.append(code.charAt(i));
+            }
+        }
+        return sb.toString();
+    }
+    public static String removeCommentsWithQuote(String code)
+    {
+        StringBuilder sb = new StringBuilder();
+        int cnt = 0;
+        boolean quoteFlag = false;
+        for (int i = 0; i < code.length(); i++)
+        {
+            if(!quoteFlag)
+            {
+                if(code.charAt(i) == '\"')
+                {
+                    sb.append(code.charAt(i));
+                    quoteFlag = true;
+                    continue;
+                }
+                else
+                {
+                    if(cnt == 0)
+                    {
+                        if(i+1 < code.length() && code.charAt(i) == '/' && code.charAt(i+1) == '*')
+                        {
+                            cnt++;
+                            i++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if(i+1 < code.length() && code.charAt(i) == '*' && code.charAt(i+1) == '/')
+                        {
+                            cnt--;
+                            i++;
+                            continue;
+                        }
+                        if(i+1 < code.length() && code.charAt(i) == '/' && code.charAt(i+1) == '*')
+                        {
+                            cnt++;
+                            i++;
+                            continue;
+                        }
+                    }
+                    if(cnt == 0)
+                    {
+                        sb.append(code.charAt(i));
+                        continue;
+                    }
+                }
+            }
+            else
+            {
+                if(code.charAt(i) == '\"' && code.charAt(i-1) != '\\')
+                {
+                    sb.append(code.charAt(i));
+                    quoteFlag = false;
+                }
+                else
+                {
+                    sb.append(code.charAt(i));
+                }
+            }
+        }
+        return sb.toString();
+    }
+    public static String removeCommentsWithQuoteAndDoubleEscape(String code)
+    {
+        StringBuilder sb = new StringBuilder();
+        int cnt = 0;
+        boolean quoteFlag = false;
+        for (int i = 0; i < code.length(); i++)
+        {
+            if(!quoteFlag)
+            {
+                if(code.charAt(i) == '\"')
+                {
+                    sb.append(code.charAt(i));
+                    quoteFlag = true;
+                    continue;
+                }
+                else if(i+1 < code.length() && code.charAt(i) == '/' && code.charAt(i+1) == '/')
+                {
+                    while(code.charAt(i) != '\n')
+                    {
+                        i++;
+                    }
+                    continue;
+                }
+                else
+                {
+                    if(cnt == 0)
+                    {
+                        if(i+1 < code.length() && code.charAt(i) == '/' && code.charAt(i+1) == '*')
+                        {
+                            cnt++;
+                            i++;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if(i+1 < code.length() && code.charAt(i) == '*' && code.charAt(i+1) == '/')
+                        {
+                            cnt--;
+                            i++;
+                            continue;
+                        }
+                        if(i+1 < code.length() && code.charAt(i) == '/' && code.charAt(i+1) == '*')
+                        {
+                            cnt++;
+                            i++;
+                            continue;
+                        }
+                    }
+                    if(cnt == 0)
+                    {
+                        sb.append(code.charAt(i));
+                        continue;
+                    }
+                }
+            }
+            else
+            {
+                if(code.charAt(i) == '\"' && code.charAt(i-1) != '\\')
+                {
+                    sb.append(code.charAt(i));
+                    quoteFlag = false;
+                }
+                else
+                {
+                    sb.append(code.charAt(i));
+                }
+            }
+        }
+        return sb.toString();
+    }
+    public static String ReadFileToString(String FilePath)
+    {
+        FileInputStream fis = null;
+        BufferedReader br = null;
+        try
+        {
+            fis = new FileInputStream(FilePath);
+            br = new BufferedReader(new InputStreamReader(fis, "utf-8"));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        StringBuffer sb = new StringBuffer();
+        String temp = null;
+        try
+        {
+            while((temp = br.readLine()) != null)
+            {
+                sb.append(temp+'\n');
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return sb.toString();
+    }
+}
+package com.abc1225.statisticfile;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
@@ -46,7 +262,7 @@ public class StatisticFiles {
             StringBuilder builder1 = new StringBuilder();
             while((line = bufferedReader.readLine())!=null){
                 String s = line.trim();
-                if(s.length() == 0){
+                if(s.length() == 0 || s.startsWith("
                     continue;
                 }
                 builder1.append(line).append("\n");
@@ -118,7 +334,7 @@ public class StatisticFiles {
             StringBuilder builder1 = new StringBuilder();
             while((line = bufferedReader.readLine())!=null){
                 String s = line.trim();
-                if(s.length() == 0){
+                if(s.length() == 0 || s.startsWith("
                     continue;
                 }
                 builder1.append(line).append("\n");
@@ -149,7 +365,7 @@ public class StatisticFiles {
         return lineCount;
     }
     private static String removeComment(String text){
-        return text.replaceAll("(?<!:)\\/\\/.*|\\/\\*(\\s|.)*?\\*\\/", "\n");
+        return text.replaceAll("(?<!:)\\/\\/.*|(?<!image)\\/\\*(\\s|.)*?\\*\\/", "\n");
     }
     private static String getFileSuffix(String fileName){
         return fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -160,9 +376,7 @@ import java.util.ArrayList;
 public class TestComment {
     public static ArrayList<String> mIncludeExt = new ArrayList<>();
     private static String removeComment(String text){       
-        return text.replaceAll("(?<!:)\\/\\/.*|\\/\\*(\\s|.)*?\\*\\/", "\n");
-    }
-    private static String getFileSuffix(String fileName){    
+        String error = "this is a BUG 
         return  
  fileName.substring(fileName.lastIndexOf(".") + 1);
     }
